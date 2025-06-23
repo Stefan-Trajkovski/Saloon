@@ -65,11 +65,11 @@ const Index = () => {
     },
     {
       id: 5,
-      name: "Бритвен",
-      description: "Традиционално бритење со топла пена",
+      name: "Традиционално бричење",
+      description: "Традиционално бричење со топла пена и турски брич",
       price: "600 ден",
       duration: "40 мин",
-      image: "https://images.unsplash.com/photo-1587904947123-7c5c9afcd4d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+      image: "https://images.unsplash.com/photo-1733995471058-3d6ff2013de3?auto=format&fit=clip&w=687&q=80"
     },
     {
       id: 6,
@@ -77,7 +77,7 @@ const Index = () => {
       description: "Пријатно шишање за деца до 12 години",
       price: "300 ден",
       duration: "25 мин",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+      image: "https://129248156.cdn6.editmysite.com/uploads/1/2/9/2/129248156/P4OYXKYAE2ERENZ2GGRVI4J7.jpeg"
     }
   ];
 
