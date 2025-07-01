@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "print-cwd": "node -e \"console.log('Current working directory:', process.cwd())\""
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
