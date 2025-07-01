@@ -8,6 +8,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const host = "0.0.0.0";
 
 app.use(cors()); // allow cross-origin requests from frontend
 app.use(express.json()); // parse JSON bodies
@@ -122,6 +123,6 @@ app.get("/api/free-timeslots", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, host, () => {
+  console.log(`Server running on http://${host}:${PORT}`);
 });
