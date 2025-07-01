@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "print-cwd": "node -e \"console.log('Current working directory:', process.cwd())\""
   },
   "keywords": [],
   "author": "",
