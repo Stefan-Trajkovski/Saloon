@@ -19,7 +19,7 @@ const Index = () => {
   };
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:info@elitebarbershop.mk';
+    window.location.href = 'mailto:stefan@cyber.org.mk';
   };
 
   const handlePhoneClick = () => {

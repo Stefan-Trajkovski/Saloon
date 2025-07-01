@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Calendar, Clock, User, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import emailjs from "@emailjs/browser";
+
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -14,67 +16,153 @@ interface AppointmentModalProps {
 }
 
 const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
+  // Initialize EmailJS once on component mount
+  useEffect(() => {
+    emailjs.init("4h5rN9OqZ9I8XyNOc");
+  }, []);
+const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     service: "",
     date: "",
-    time: ""
+    time: "",
   });
 
   const services = [
     "Класично шишање",
-    "Брада и мустаќи", 
+    "Брада и мустаќи",
     "Машинско шишање",
     "Комплетен третман",
     "Бритвен",
-    "Детско шишање"
+    "Детско шишање",
   ];
 
   const timeSlots = [
-    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
-    "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
-    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
-    "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+    "08:00",
+    "08:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+    "18:00",
+    "18:30",
+    "19:00",
+    "19:30",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.phone || !formData.service || !formData.date || !formData.time) {
+
+    // Validate required fields
+    if (
+      !formData.name ||
+      !formData.phone ||
+      !formData.service ||
+      !formData.date ||
+      !formData.time
+    ) {
       toast({
         title: "Грешка",
         description: "Ве молиме пополнете ги сите задолжителни полиња.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    console.log("Appointment data:", formData);
-    
-    toast({
-      title: "Терминот е закажан!",
-      description: `Вашиот термин за ${formData.service} е закажан за ${formData.date} во ${formData.time}. Ќе ве контактираме за потврда.`,
-    });
-    
-    onClose();
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      service: "",
-      date: "",
-      time: ""
-    });
+    const templateParams = {
+      from_name: formData.name,
+      from_phone: formData.phone,
+      from_email: formData.email || "Не е даден е-маил",
+      service: formData.service,
+      date: formData.date,
+      time: formData.time,
+    };
+
+    try {
+      // Send email via EmailJS
+      await emailjs.send(
+        "service_nqyisri",
+        "template_gld6xb8",
+        templateParams
+      );
+
+      // Send appointment data to backend
+      const response = await fetch("http://localhost:3001/api/appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add appointment");
+      }
+
+      toast({
+        title: "Терминот е закажан!",
+        description: `Вашиот термин за ${formData.service} е закажан за ${formData.date} во ${formData.time}. Ви благодариме на довербата.`,
+      });
+
+      onClose();
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        date: "",
+        time: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Грешка при додавање на термин",
+        description: error.message || "Обидете се повторно подоцна.",
+        variant: "destructive",
+      });
+      console.error("Error scheduling appointment:", error);
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+const handleInputChange = async (field: string, value: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    [field]: value,
+    ...(field === "date" ? { time: "" } : {}) // reset time when date changes
+  }));
+
+  if (field === "date") {
+    try {
+      console.log(value)
+      const response = await fetch(`http://localhost:3001/api/free-timeslots?date=${value}`);
+      const data = await response.json();
+      if (response.ok) {
+        setAvailableTimeSlots(data.freeSlots || []);
+      } else {
+        console.error("Failed to fetch time slots:", data.message);
+        setAvailableTimeSlots([]);
+      }
+    } catch (err) {
+      console.error("Error fetching time slots:", err);
+      setAvailableTimeSlots([]);
+    }
+  }
+};
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -85,7 +173,7 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
             Закажи термин
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -100,10 +188,11 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className="pl-10 border-slate-200 focus:border-slate-500"
                   placeholder="Внесете го вашето име"
+                  required
                 />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="phone" className="text-gray-700 font-medium">
                 Телефон *
@@ -116,11 +205,12 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   className="pl-10 border-slate-200 focus:border-slate-500"
                   placeholder="070 987 654"
+                  required
                 />
               </div>
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="email" className="text-gray-700 font-medium">
               Е-маил
@@ -137,10 +227,14 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
               />
             </div>
           </div>
-          
+
           <div>
             <Label className="text-gray-700 font-medium">Услуга *</Label>
-            <Select value={formData.service} onValueChange={(value) => handleInputChange("service", value)}>
+            <Select
+              value={formData.service}
+              onValueChange={(value) => handleInputChange("service", value)}
+              required
+            >
               <SelectTrigger className="border-slate-200 focus:border-slate-500">
                 <SelectValue placeholder="Изберете услуга" />
               </SelectTrigger>
@@ -153,7 +247,7 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="date" className="text-gray-700 font-medium">
@@ -165,18 +259,23 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
                 value={formData.date}
                 onChange={(e) => handleInputChange("date", e.target.value)}
                 className="border-slate-200 focus:border-slate-500"
-                min={new Date().toISOString().split('T')[0]}
+                min={new Date().toISOString().split("T")[0]}
+                required
               />
             </div>
-            
+
             <div>
               <Label className="text-gray-700 font-medium">Време *</Label>
-              <Select value={formData.time} onValueChange={(value) => handleInputChange("time", value)}>
+              <Select
+                value={formData.time}
+                onValueChange={(value) => handleInputChange("time", value)}
+                required
+              >
                 <SelectTrigger className="border-slate-200 focus:border-slate-500">
                   <SelectValue placeholder="Изберете време" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeSlots.map((time) => (
+                  {availableTimeSlots.map((time) => (
                     <SelectItem key={time} value={time}>
                       {time}
                     </SelectItem>
@@ -185,7 +284,7 @@ const AppointmentModal = ({ isOpen, onClose }: AppointmentModalProps) => {
               </Select>
             </div>
           </div>
-          
+
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
