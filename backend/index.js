@@ -7,8 +7,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const host = "0.0.0.0";
+const PORT = process.env.PORT || 3001;
+
 
 app.use(cors()); // allow cross-origin requests from frontend
 app.use(express.json()); // parse JSON bodies
@@ -58,6 +58,7 @@ app.post("/api/appointment", async (req, res) => {
 
 
 app.get("/api/free-timeslots", async (req, res) => {
+  console.error("Poseta")
   const date = req.query.date; // e.g. '2025-07-04'
 
   if (!date) {
@@ -123,6 +124,7 @@ app.get("/api/free-timeslots", async (req, res) => {
   }
 });
 
-app.listen(PORT, host, () => {
-  console.log(`Server running on http://${host}:${PORT}`);
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

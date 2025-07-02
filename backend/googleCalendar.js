@@ -8,26 +8,31 @@ dotenv.config();
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const TEMP_KEYFILE_PATH = path.resolve(process.cwd(), "service-account.json");
 
-// Write the service account JSON from env to a temp file, overwriting if changed
 function writeKeyFile() {
-  if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    console.warn(
-      "Warning: GOOGLE_SERVICE_ACCOUNT_JSON env variable is not set. Authorization might fail."
-    );
+  const rawJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!rawJson) {
+    console.warn("GOOGLE_SERVICE_ACCOUNT_JSON not set.");
     return;
   }
 
   try {
-    // Write the key file every time (or you can cache it if you want)
-    fs.writeFileSync(TEMP_KEYFILE_PATH, process.env.GOOGLE_SERVICE_ACCOUNT_JSON, {
-      encoding: "utf8",
-      flag: "w",
-    });
-    console.log("Service account key file written to", TEMP_KEYFILE_PATH);
+    const parsed = JSON.parse(rawJson);
+    parsed.private_key = parsed.private_key.replace(/\\n/g, '\n');
+    const fixedJsonString = JSON.stringify(parsed, null, 2);
+
+    const currentContent = fs.existsSync(TEMP_KEYFILE_PATH)
+      ? fs.readFileSync(TEMP_KEYFILE_PATH, "utf8")
+      : null;
+
+    if (currentContent !== fixedJsonString) {
+      fs.writeFileSync(TEMP_KEYFILE_PATH, fixedJsonString, { encoding: "utf8", flag: "w" });
+      console.log("Updated service account key file.");
+    }
   } catch (err) {
-    console.error("Failed to write service account key file:", err);
+    console.error("Failed to parse or write service account JSON:", err);
   }
 }
+
 
 // Ensure key file is written on module load
 writeKeyFile();
