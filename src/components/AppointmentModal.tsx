@@ -77,10 +77,10 @@ const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
       );
 
       // Send appointment data to backend
-      const response = await fetch("http://localhost:8080/api/appointment", {
+      const response = await fetch("https://enthusiastic-renewal.railway.internal/api/appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
 
@@ -123,7 +123,7 @@ const handleInputChange = async (field: string, value: string) => {
   if (field === "date") {
     try {
       console.log(value)
-      const response = await fetch(`http://localhost:8080/api/free-timeslots?date=${value}`);
+      const response = await fetch(`https://enthusiastic-renewal.railway.internal/api/free-timeslots?date=${value}`);
       const data = await response.json();
       if (response.ok) {
         setAvailableTimeSlots(data.freeSlots || []);
