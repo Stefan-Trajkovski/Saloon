@@ -34,7 +34,7 @@ const Index = () => {
     {
       id: 1,
       name: "Класично шишање",
-      description: "Професионално мажко шишање со ножици и машинка",
+      description: "Професионално машко шишање со ножици и машинка",
       price: "500 ден",
       duration: "30 мин",
       image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -58,7 +58,7 @@ const Index = () => {
     {
       id: 4,
       name: "Комплетен третман",
-      description: "Шишање, брада, шампонирање и стилизирање",
+      description: "Шишање, брада, миење и стилизирање",
       price: "800 ден",
       duration: "60 мин",
       image: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
@@ -84,7 +84,7 @@ const Index = () => {
   const testimonials = [
     {
       name: "Стефан Јованов",
-      text: "Најдобриот берберин во градот! Секогаш излегувам задоволен и со одлична фризура.",
+      text: "Најдобриот бербер во градот! Секогаш излегувам задоволен и со одлична фризура.",
       rating: 5
     },
     {
